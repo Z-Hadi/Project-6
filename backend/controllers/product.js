@@ -1,9 +1,38 @@
 const Sauce = require('../models/product');
+
 const fs = require('fs');
 
 exports.createSauce = (req, res, next) => {
 
-    const sauce = JSON.parse(req.body.sauce)
+    const sauceData = JSON.parse(req.body.sauce)
+    const url = req.protocol + '://' + req.get('host');
+    const sauce = new Sauce({
+        name: sauceData.name,
+        manufacturer: sauceData.manufacturer,
+        description: sauceData.description,
+        imageUrl: url + '/images/' + req.file.filename,
+        mainPepper: sauceData.mainPepper,
+        heat: sauceData.heat,
+        userId: sauceData.userId
+    });
+    console.log(sauce);
+    sauce.save().then(
+        () => {
+            res.status(201).json({
+                message: 'Post saved successfully!'
+            });
+        }
+    ).catch(
+        (error) => {
+            res.status(400).json(error);
+        }
+    );
+};
+
+
+exports.likeSauce = (req, res, next) => {
+
+    /*  const sauce = JSON.parse(req.body.sauce)
     console.log(sauce)
     const url = req.protocol + '://' + req.get('host');
     const thing = new Sauce({
@@ -18,15 +47,17 @@ exports.createSauce = (req, res, next) => {
     sauce.save().then(
         () => {
             res.status(201).json({
-                message: 'Post saved successfully!'
+                message: 'Like saved successfully!'
             });
         }
     ).catch(
         (error) => {
             res.status(400).json(error);
         }
-    );
+    );  */
 };
+
+
 
 exports.getOneSauce = (req, res, next) => {
     Sauce.findOne({
@@ -43,30 +74,32 @@ exports.getOneSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
+
     let sauce = new Sauce({ _id: req.params._id });
     if (req.file) {
         const url = req.protocol + '://' + req.get('host');
-        req.body.sauce = JSON.parse(req.body.sauce);
+        const sauceData = JSON.parse(req.body.sauce)
         sauce = {
             _id: req.params.id,
-            name: sauce.name,
-            manufacturer: sauce.manufacturer,
-            description: sauce.description,
+            name: sauceData.name,
+            manufacturer: sauceData.manufacturer,
+            description: sauceData.description,
             imageUrl: url + '/images/' + req.file.filename,
-            mainPepper: sauce.mainPepper,
-            heat: sauce.heat,
-            userId: sauce.userId
+            mainPepper: sauceData.mainPepper,
+            heat: sauceData.heat,
+            userId: sauceData.userId
         };
     } else {
+
         sauce = {
             _id: req.params.id,
-            name: sauce.name,
-            manufacturer: sauce.manufacturer,
-            description: sauce.description,
-            imageUrl: url + '/images/' + req.file.filename,
-            mainPepper: sauce.mainPepper,
-            heat: sauce.heat,
-            userId: sauce.userId
+            name: req.body.name,
+            manufacturer: req.body.manufacturer,
+            description: req.body.description,
+            imageUrl: req.body.imageUrl,
+            mainPepper: req.body.mainPepper,
+            heat: req.body.heat,
+            userId: req.body.userId
         };
     }
     Sauce.updateOne({ _id: req.params.id }, sauce).then(

@@ -9,8 +9,13 @@ const path = require('path');
 const productRoutes = require('./routes/product');
 const userRoutes = require('./routes/user');
 
+const helmet = require("helmet");
 
 const app = express();
+
+app.use(helmet());
+
+
 mongoose.connect('mongodb+srv://Zaid:MEFfZKi4zYRgvwsg@cluster0.ntc3r.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
     .then(() => {
         console.log('Successfully connected to MongoDB Atlas!');
