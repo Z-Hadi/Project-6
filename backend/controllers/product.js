@@ -15,7 +15,7 @@ exports.createSauce = (req, res, next) => {
         heat: sauceData.heat,
         userId: sauceData.userId
     });
-    console.log(sauce);
+
     sauce.save().then(
         () => {
             res.status(201).json({
@@ -31,30 +31,49 @@ exports.createSauce = (req, res, next) => {
 
 
 exports.likeSauce = (req, res, next) => {
+    const updateDoc = {};
+    if (req.params.likes !== 0) {
 
-    /*  const sauce = JSON.parse(req.body.sauce)
-    console.log(sauce)
-    const url = req.protocol + '://' + req.get('host');
-    const thing = new Sauce({
-        name: sauce.name,
-        manufacturer: sauce.manufacturer,
-        description: sauce.description,
-        imageUrl: url + '/images/' + req.file.filename,
-        mainPepper: sauce.mainPepper,
-        heat: sauce.heat,
-        userId: sauce.userId
-    });
-    sauce.save().then(
-        () => {
-            res.status(201).json({
-                message: 'Like saved successfully!'
-            });
+        if (req.params.likes === 1) {
+            updateDoc.$inc = { likes: 1 }
+            updateDoc.$push = { usersLiked: req.body.userId }
+        } else {
+            updateDoc.$inc = { dislikes: 1 }
+            updateDoc.$push = { usersDisliked: req.body.userId }
+
         }
-    ).catch(
-        (error) => {
-            res.status(400).json(error);
-        }
-    );  */
+        Sauce.updateOne({ _id: req.params.id }, updateDoc).then(
+            () => {
+                res.status(201).json({ message: 'successful' });
+            }
+        ).catch(
+            (error) => {
+                res.status(400).json(error);
+            }
+        );
+
+
+    } else {
+        Sauce.findOne({ _id: req.params.id })
+            .then(sauce => {
+                if (sauce.usersLiked.includes(req.params.userId)) {
+                    updateDoc.$inc = { likes: -1 }
+                    updateDoc.$push = { usersLiked: req.body.userId }
+                } else {
+                    updateDoc.$inc = { dislikes: -1 }
+                    updateDoc.$push = { usersDisliked: req.body.userId }
+                }
+
+                Sauce.updateOne({ _id: req.params.id }, updateDoc)
+                    .then(() => res.status(200).json({ message: 'successful!' }))
+                    .catch(
+                        (error) => {
+                            res.status(400).json(error);
+                        }
+                    );
+            })
+    }
+
 };
 
 

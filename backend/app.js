@@ -13,10 +13,11 @@ const helmet = require("helmet");
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
 
 
-mongoose.connect('mongodb+srv://Zaid:MEFfZKi4zYRgvwsg@cluster0.ntc3r.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
+
+mongoose.connect(process.env.MD_URL)
     .then(() => {
         console.log('Successfully connected to MongoDB Atlas!');
     })
