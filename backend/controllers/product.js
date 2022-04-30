@@ -29,13 +29,16 @@ exports.createSauce = (req, res, next) => {
 
 exports.likeSauce = (req, res, next) => {
     const updateDoc = {};
-    if (req.params.likes !== 0) {
-        if (req.params.likes === 1) {
-            updateDoc.$inc = { likes: 5 };
+    console.log(req.body.like);
+    if (req.body.like !== 0) {
+        if (req.body.like === 1) {
+            updateDoc.$inc = { likes: 1 };
             updateDoc.$push = { usersLiked: req.body.userId };
+            console.log('LIKE!!');
         } else {
             updateDoc.$inc = { dislikes: 1 };
             updateDoc.$push = { usersDisliked: req.body.userId };
+            console.log('DISLIKE!!');
         }
         Sauce.updateOne({ _id: req.params.id }, updateDoc)
             .then(() => {
@@ -46,12 +49,14 @@ exports.likeSauce = (req, res, next) => {
             });
     } else {
         Sauce.findOne({ _id: req.params.id }).then((sauce) => {
-            if (sauce.usersLiked.includes(req.params.userId)) {
+            if (sauce.usersLiked.includes(req.body.userId)) {
                 updateDoc.$inc = { likes: -1 };
-                updateDoc.$push = { usersLiked: req.body.userId };
+                updateDoc.$pull = { usersLiked: req.body.userId };
+                console.log('USERLIKED!!');
             } else {
                 updateDoc.$inc = { dislikes: -1 };
-                updateDoc.$push = { usersDisliked: req.body.userId };
+                updateDoc.$pull = { usersDisliked: req.body.userId };
+                console.log('USERDISLIKED!!');
             }
 
             Sauce.updateOne({ _id: req.params.id }, updateDoc)
@@ -61,6 +66,7 @@ exports.likeSauce = (req, res, next) => {
                 });
         });
     }
+
 };
 
 exports.getOneSauce = (req, res, next) => {
